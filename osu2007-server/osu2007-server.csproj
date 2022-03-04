@@ -3,7 +3,7 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>net5.0</TargetFramework>
-    <RootNamespace>osu2007_server</RootNamespace>
+    <RootNamespace>osu2007server</RootNamespace>
   </PropertyGroup>
 
 </Project>
