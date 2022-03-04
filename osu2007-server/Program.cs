@@ -39,21 +39,17 @@ namespace osu2007server
 
 				switch (request.Url.AbsolutePath) {
 					case "/web/osu-login.php": {
-							string username = request.QueryString["username"];
-							string password = request.QueryString["password"];
-							data = Encoding.UTF8.GetBytes("1");
+							data = UrlMethods.Login(request.QueryString["username"], request.QueryString["password"]);
 							break;
 						}
 
 					case "/web/osu-getscores.php": {
-							string mapHash = request.QueryString["c"];
-							data = Encoding.UTF8.GetBytes("0:Flux:500000:600:0:15:575:0:0:0:True:0\n0:Not Flux:420727:444:0:15:575:13213:0:0:True:4");
+							data = UrlMethods.GetScores(request.QueryString["c"]);
 							break;
 						}
 
 					case "/web/osu-getuserinfo.php": {
-							string username = request.QueryString["username"];
-							data = Encoding.UTF8.GetBytes($"{username}|9|1111|-1|97.27|1");
+							data = UrlMethods.GetUserInfo(request.QueryString["username"]);
 							break;
 						}
 
