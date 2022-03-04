@@ -96,7 +96,6 @@ namespace osu2007server
 
 				Console.WriteLine(request.Url.AbsolutePath);
 
-				// data = Encoding.UTF8.GetBytes("This works!");
 				response.ContentType = "text/plain";
 				response.ContentEncoding = Encoding.UTF8;
 				response.ContentLength64 = data.LongLength;
