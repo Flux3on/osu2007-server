@@ -39,47 +39,27 @@ namespace osu2007server
 
 				switch (request.Url.AbsolutePath) {
 					case "/web/osu-login.php": {
-							data = UrlMethods.Login(request.QueryString["username"], request.QueryString["password"]);
+							data = UrlMethods.Login(request);
 							break;
 						}
 
 					case "/web/osu-getscores.php": {
-							data = UrlMethods.GetScores(request.QueryString["c"]);
+							data = UrlMethods.GetScores(request);
 							break;
 						}
 
 					case "/web/osu-getuserinfo.php": {
-							data = UrlMethods.GetUserInfo(request.QueryString["username"]);
+							data = UrlMethods.GetUserInfo(request);
 							break;
 						}
 
 					case "/web/osu-submit.php": {
-							string score_line = request.QueryString["score"];
-							string password = request.QueryString["password"];
-
-							int len = int.Parse(request.Headers["Content-Length"]);
-							byte[] buffer = new byte[len];
-							request.InputStream.Read(buffer, 0, len);
-
-							string stringBuffer = Encoding.UTF8.GetString(buffer);
-							List<byte> bytes = new List<byte>(buffer);
-							string[] splitString = stringBuffer.Split('\n');
-							int lengthOfFourLines = splitString[0].Length + splitString[1].Length +
-							splitString[2].Length + splitString[3].Length + 4;
-							bytes.RemoveRange(0, lengthOfFourLines);
-							int lengthOfLastLine = splitString[^2].Length + 2;
-							bytes.RemoveRange(bytes.Count - lengthOfLastLine, lengthOfLastLine);
-							buffer = bytes.ToArray();
-
-							File.WriteAllBytes("something.osr", buffer);
-
-							data = new byte[0];
+							data = UrlMethods.SubmitScore(request);
 							break;
 						}
 
 					case "/web/osu-getreplay.php": {
-							int id = int.Parse(request.QueryString["c"]);
-							data = File.ReadAllBytes("something.osr");
+							data = UrlMethods.GetReplay(request);
 							break;
                         }
 
