@@ -73,8 +73,8 @@ namespace osu2007server
 					Console.WriteLine($"Successfully created account {username}.");
 					connection.Close();
 
-					string a = "1";
-					return Encoding.UTF8.GetBytes(a); 
+
+					return Encoding.UTF8.GetBytes("1"); 
 					
 				} else
                 {
