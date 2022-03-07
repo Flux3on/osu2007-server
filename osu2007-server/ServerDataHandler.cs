@@ -17,15 +17,14 @@ namespace osu2007server
 		public static string userid;
 		private static string password;
 		private static string connString;
-		private static MySqlConnection connection;
-		private static SHA512 shaCalculator;
 
 		public static void SetUser(string u, string p)
 		{
 			userid = u;
 			password = p;
 			connString = $@"server={server};userid={userid};password={password};database={database}";
-			connection = new MySqlConnection(connString);
+			// Set the connection up
+			using var connection = new MySqlConnection(connString);
 			// Here to test connection to SQL server
 			try
             {
@@ -47,9 +46,9 @@ namespace osu2007server
 			if (username.Length >= 3 && IsValidHash(password) && !username.Contains(':'))
             {
 				// Start SQL Code
-				connection.Open();
 
-				
+				using var connection = new MySqlConnection(connString);
+				connection.Open();
 
 				string sql = $"SELECT * from `users` WHERE `username` = '{username}'";
 				using var cmd = new MySqlCommand(sql, connection);
@@ -103,7 +102,6 @@ namespace osu2007server
 				// End SQL Code
 			} else
             {
-				connection.Close();
 				return Encoding.UTF8.GetBytes("0");
 			}
 
