@@ -4,6 +4,7 @@ using System.Text;
 using System.Net;
 using System.Threading.Tasks;
 using System.Collections.Generic;
+using MySql.Data.MySqlClient;
 
 namespace osu2007server
 {
@@ -39,27 +40,27 @@ namespace osu2007server
 
 				switch (request.Url.AbsolutePath) {
 					case "/web/osu-login.php": {
-							data = UrlMethods.Login(request);
+							data = ServerDataHandler.Login(request);
 							break;
 						}
 
 					case "/web/osu-getscores.php": {
-							data = UrlMethods.GetScores(request);
+							data = ServerDataHandler.GetScores(request);
 							break;
 						}
 
 					case "/web/osu-getuserinfo.php": {
-							data = UrlMethods.GetUserInfo(request);
+							data = ServerDataHandler.GetUserInfo(request);
 							break;
 						}
 
 					case "/web/osu-submit.php": {
-							data = UrlMethods.SubmitScore(request);
+							data = ServerDataHandler.SubmitScore(request);
 							break;
 						}
 
 					case "/web/osu-getreplay.php": {
-							data = UrlMethods.GetReplay(request);
+							data = ServerDataHandler.GetReplay(request);
 							break;
                         }
 
@@ -86,6 +87,38 @@ namespace osu2007server
 		public static void Main(string[] args)
 		{
 			Console.WriteLine("osu!2007 Server");
+
+			// Accept input for Database login
+			// (This is crappy code I am sorry
+			// to anyone who has had to read
+			// this bullshit code)
+			Console.WriteLine($"Target Server: {ServerDataHandler.server}");
+			Console.WriteLine($"Target Database: {ServerDataHandler.database}");
+			Console.Write("Database Username: ");
+			string username = Console.ReadLine();
+			Console.Write("Database Password: ");
+			string password = string.Empty;
+			ConsoleKey key;
+			do
+			{
+				var keyInfo = Console.ReadKey(intercept: true);
+				key = keyInfo.Key;
+
+				if (key == ConsoleKey.Backspace && password.Length > 0)
+				{
+					Console.Write("\b \b");
+					password = password[0..^1];
+				}
+				else if (!char.IsControl(keyInfo.KeyChar))
+				{
+					Console.Write("*");
+					password += keyInfo.KeyChar;
+				}
+			} while (key != ConsoleKey.Enter);
+			Console.WriteLine();
+
+			// Set the SQL Database user
+			ServerDataHandler.SetUser(username, password);
 
 			// Create an HTTP Server; Start listening for a connection~
 			listener = new HttpListener();
