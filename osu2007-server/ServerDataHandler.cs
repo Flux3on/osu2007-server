@@ -1,17 +1,15 @@
-﻿using System;
-using System.IO;
+﻿using MySql.Data.MySqlClient;
+using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using System.IO;
 using System.Net;
-using System.Threading.Tasks;
-using MySql.Data.MySqlClient;
-using Scrypt;
+using System.Text;
 using System.Text.RegularExpressions;
+using System.Security.Cryptography;
 
 namespace osu2007server
 {
-	public static class ServerDataHandler
+    public static class ServerDataHandler
 	{
 		// Configuration for the server
 		public static string server = "localhost";
@@ -20,7 +18,7 @@ namespace osu2007server
 		private static string password;
 		private static string connString;
 		private static MySqlConnection connection;
-		private static ScryptEncoder hasher = new ScryptEncoder();
+		private static SHA512 shaCalculator;
 
 		public static void SetUser(string u, string p)
 		{
@@ -46,7 +44,7 @@ namespace osu2007server
 			string username = r.QueryString["username"];
 			string password = r.QueryString["password"];
 
-			if (username != "" && username != "hell" && password != "" && !username.Contains(':'))
+			if (username.Length >= 3 && IsValidHash(password) && !username.Contains(':'))
             {
 				// Start SQL Code
 				connection.Open();
@@ -62,27 +60,29 @@ namespace osu2007server
 				if (!rdr.HasRows)
 				{
 					rdr.Close();
-					string passwordEnc = hasher.Encode(password);
 					Console.WriteLine($"User {username} not found. creating account...");
 					sql = "INSERT INTO `users` VALUES(NULL, @username, @password, 0, 0, 0, 0)";
 					using var cmd2 = new MySqlCommand(sql, connection);
 
 					cmd2.Parameters.AddWithValue("@username", username);
-					cmd2.Parameters.AddWithValue("@password", passwordEnc);
+					cmd2.Parameters.AddWithValue("@password", password);
 					cmd2.Prepare();
 
 					cmd2.ExecuteNonQuery();
 
 					Console.WriteLine($"Successfully created account {username}.");
 					connection.Close();
-					
-					return Encoding.UTF8.GetBytes("1");
+
+					string a = "1";
+					return Encoding.UTF8.GetBytes(a); 
 					
 				} else
                 {
 					Console.WriteLine($"User {username} found. Attempting to Authenticate...");
 
-					if (hasher.Compare(password, rdr.GetString("password")))
+					rdr.Read();
+
+					if (password == rdr.GetString("password"))
                     {
 						rdr.Close();
 						connection.Close();
@@ -153,14 +153,14 @@ namespace osu2007server
 			return File.ReadAllBytes("something.osr");
 		}
 
-		public static bool IsMD5(string input)
+		public static bool IsValidHash(string input)
 		{
 			if (String.IsNullOrEmpty(input))
 			{
 				return false;
 			}
 
-			return Regex.IsMatch(input, "^[0-9a-fA-F]{32}$", RegexOptions.Compiled);
+			return Regex.IsMatch(input, "^[0-9a-fA-F]{128}$", RegexOptions.Compiled);
 		}
 
 	}
