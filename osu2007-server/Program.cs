@@ -126,7 +126,6 @@ namespace osu2007server
 
 			// Handle Requests
 			HandleIncomingConnections();
-			listenTask.GetAwaiter().GetResult();
 
 
 			// Close Listener

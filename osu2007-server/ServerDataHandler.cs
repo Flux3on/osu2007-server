@@ -40,12 +40,21 @@ namespace osu2007server
 
 		public static void Login(HttpListenerRequest rq, HttpListenerResponse rs)
 		{
+			// get the input parameters
 			string username = rq.QueryString["username"];
 			string password = rq.QueryString["password"];
+			string result;
 
-			StreamWriter sw = new(rs.OutputStream, Encoding.UTF8);
+
+
+			// Write the stream
+			MemoryStream ms = new();
+			StreamWriter sw = new(ms, Encoding.UTF8);
+
 			sw.Write("1");
-			rs.ContentLength64 = sw.BaseStream.Position;
+
+			rs.OutputStream.Write(ms.ToArray());
+			rs.ContentLength64 = ms.Length;
 
 		}
 		
