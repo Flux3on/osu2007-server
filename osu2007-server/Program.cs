@@ -8,21 +8,21 @@ using MySql.Data.MySqlClient;
 
 namespace osu2007server
 {
-	public class Program
+	public static class Program
 	{
 
 		private static HttpListener listener;
 		public const string url = "http://localhost:8000/";
 		private static int requestCount = 0; 
 
-		public static async Task HandleIncomingConnections()
+		public static void HandleIncomingConnections()
 		{
 			bool serverActive = true;
 
 			while (serverActive)
 			{
 				// Awaiting user response here
-				HttpListenerContext context = await listener.GetContextAsync();
+				HttpListenerContext context = listener.GetContext();
 
 				// Get the request/response objects
 				HttpListenerRequest request = context.Request;
@@ -40,7 +40,7 @@ namespace osu2007server
 
 				switch (request.Url.AbsolutePath) {
 					case "/web/osu-login.php": {
-							data = ServerDataHandler.Login(request);
+							ServerDataHandler.Login(request, response);
 							break;
 						}
 
@@ -75,10 +75,8 @@ namespace osu2007server
 
 				response.ContentType = "text/plain";
 				response.ContentEncoding = Encoding.UTF8;
-				response.ContentLength64 = data.LongLength;
 
 				// Write to the response stream then close it
-				response.OutputStream.Write(data, 0, data.Length);
 				response.Close();
 
 			}
@@ -127,7 +125,7 @@ namespace osu2007server
 			Console.WriteLine($"Listening for connections on {url}");
 
 			// Handle Requests
-			Task listenTask = HandleIncomingConnections();
+			HandleIncomingConnections();
 			listenTask.GetAwaiter().GetResult();
 
 

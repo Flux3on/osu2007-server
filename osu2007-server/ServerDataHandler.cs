@@ -17,7 +17,7 @@ namespace osu2007server
 		public static string userid;
 		private static string password;
 		private static string connString;
-
+		
 		public static void SetUser(string u, string p)
 		{
 			userid = u;
@@ -38,75 +38,15 @@ namespace osu2007server
 			connection.Close();
 		}
 
-		public static byte[] Login(HttpListenerRequest r)
+		public static void Login(HttpListenerRequest rq, HttpListenerResponse rs)
 		{
-			string username = r.QueryString["username"];
-			string password = r.QueryString["password"];
+			string username = rq.QueryString["username"];
+			string password = rq.QueryString["password"];
 
-			if (username.Length >= 3 && IsValidHash(password) && !username.Contains(':'))
-            {
-				// Start SQL Code
+			StreamWriter sw = new(rs.OutputStream, Encoding.UTF8);
+			sw.Write("1");
+			rs.ContentLength64 = sw.BaseStream.Position;
 
-				using var connection = new MySqlConnection(connString);
-				connection.Open();
-
-				string sql = $"SELECT * from `users` WHERE `username` = '{username}'";
-				using var cmd = new MySqlCommand(sql, connection);
-
-				using MySqlDataReader rdr = cmd.ExecuteReader();
-				
-
-				if (!rdr.HasRows)
-				{
-					rdr.Close();
-					Console.WriteLine($"User {username} not found. creating account...");
-					sql = "INSERT INTO `users` VALUES(NULL, @username, @password, 0, 0, 0, 0)";
-					using var cmd2 = new MySqlCommand(sql, connection);
-
-					cmd2.Parameters.AddWithValue("@username", username);
-					cmd2.Parameters.AddWithValue("@password", password);
-					cmd2.Prepare();
-
-					cmd2.ExecuteNonQuery();
-
-					Console.WriteLine($"Successfully created account {username}.");
-					connection.Close();
-
-
-					return Encoding.UTF8.GetBytes("1"); 
-					
-				} else
-                {
-					Console.WriteLine($"User {username} found. Attempting to Authenticate...");
-
-					rdr.Read();
-
-					if (password == rdr.GetString("password"))
-                    {
-						rdr.Close();
-						connection.Close();
-						
-						Console.WriteLine($"Authentication Succeeded. Logged in as {username}.");
-						return Encoding.UTF8.GetBytes("1");
-					} else
-                    {
-						rdr.Close();
-						connection.Close();
-						Console.WriteLine($"Authentication for {username} failed.");
-						return Encoding.UTF8.GetBytes("0");
-					}
-
-
-				}
-
-				// End SQL Code
-			} else
-            {
-				return Encoding.UTF8.GetBytes("0");
-			}
-
-
-			
 		}
 		
 		public static byte[] GetScores(HttpListenerRequest r)
